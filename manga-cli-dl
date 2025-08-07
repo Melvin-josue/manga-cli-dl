@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# ─── MAIN ──────────────────────────────────────
+
+# ----- Main para instalar manga desde la terminal. -------
+
+set -e
+
+# ------ Colores para la salida ---------
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # Sin color
+
+# ----- selector de sitio de manga -----
+selector_manga() {
+option=$(echo -e "animeallstar \n tvymanga" | fzf --prompt="Selecciona el sitio para buscar el manga: " | xargs)
+
+case "${option}" in
+    animeallstar)
+        echo "opcion uno"
+        #python $HOME/.local/share/manga-cli-dl/src/site1.py "${manga}"
+        python ./src/site1.py "${manga}"
+        ;;
+    tvymanga)
+        echo "opcion dos"
+        #python $HOME/.local/share/manga-cli-dl/src/site2.py "${manga}"
+        python ./src/site2.py "${manga}"
+        ;;
+    *)
+        echo -e "${YELLOW}[!] Opción inválida. Saliendo...${NC}"
+        exit 1
+        ;;
+esac
+}
+
+echo "pasa el nombre del manga:"
+read manga
+selector_manga
+
+# Selecciona el número de línea del manga elegido
+num=$(cat -n ./src/results/nombres.txt | fzf --prompt="Selecciona el manga que deseas descargar: " | xargs | awk '{print $1}')
+
+# Obtiene la URL correspondiente a ese número de línea
+url=$(sed -n "${num}p" ./src/results/urls.txt)
+
+echo "Descargando imágenes de: $url"
+python ./src/results/site1_img.py "$url"
+
+downloader(){
+
+    if command -v aria2c &> /dev/null; then
+        echo "Usando aria2c para descargar..."
+        #aria2c -i $HOME/.local/share/manga-cli-dl/imagenes.txt -d $HOME/.local/share/manga-cli-dl/downloads/
+        aria2c -i ./src/results/imagenes.txt -d ./ouput/
+    elif command -v wget &> /dev/null; then
+        echo "Usando wget para descargar..."
+        #wget -i $HOME/.local/share/manga-cli-dl/imagenes.txt -P $HOME/.local/share/manga-cli-dl/downloads/
+        wget -i ./src/results/imagenes.txt -P ./ouput/
+    else
+        echo -e "${YELLOW}[!] No se encontró aria2c ni wget. Por favor, instala uno de ellos.${NC}"
+        exit 1
+    fi
+}
+
+downloader
+
+bash $HOME/.local/share/manga-cli-dl/tools/build_pdf.sh
