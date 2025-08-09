@@ -7,7 +7,6 @@
 set -e
 
 # ------ Colores para la salida ---------
-GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # Sin color
 
@@ -38,13 +37,16 @@ read manga
 selector_manga
 
 # Selecciona el número de línea del manga elegido
-num=$(cat -n ./src/results/nombres.txt | fzf --prompt="Selecciona el manga que deseas descargar: " | xargs | awk '{print $1}')
+num=$(cat -n ./src/linux/results/nombres.txt | fzf --prompt="Selecciona el manga que deseas descargar: " | xargs | awk '{print $1}')
+#num=$(cat -n $HOME/.local/share/manga-cli-dl/src/linux/results/nombres.txt | fzf --prompt="Selecciona el manga que deseas descargar: " | xargs | awk '{print $1}')
 
 # Obtiene la URL correspondiente a ese número de línea
 url=$(sed -n "${num}p" ./src/results/urls.txt)
+#url=$(sed -n "${num}p" $HOME/.local/share/home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-07-27 at 9.38.18 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-02 at 10.09.36 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.27.28 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.28.15 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-05 at 8.14.01 AM.jpeg/home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-07-27 at 9.38.18 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-02 at 10.09.36 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.27.28 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.28.15 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-05 at 8.14.01 AM.jpeg/home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-07-27 at 9.38.18 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-02 at 10.09.36 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.27.28 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.28.15 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-05 at 8.14.01 AM.jpeg/home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-07-27 at 9.38.18 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-02 at 10.09.36 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.27.28 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.28.15 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-05 at 8.14.01 AM.jpeg/home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-07-27 at 9.38.18 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-02 at 10.09.36 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.27.28 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.28.15 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-05 at 8.14.01 AM.jpeg/home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-07-27 at 9.38.18 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-02 at 10.09.36 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.27.28 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-03 at 8.28.15 AM.jpeg /home/melvin/.config/hypr/wallpapers/wallpapers/wallpapers/WhatsApp Image 2025-08-05 at 8.14.01 AM.jpeg/src/linux/results/urls.txt)
 
 echo "Descargando imágenes de: $url"
-python ./src/results/site1_img.py "$url"
+python ./src/linux/results/site1_img.py "$url"
+#python $HOME/.local/share/manga-cli-dl/src/linux/results/site1_img.py "$url"
 
 downloader(){
 

@@ -10,62 +10,63 @@ YELLOW='\033[0;33m'
 NC='\033[0m' # Sin color
 
 # ----- Creación de directorios necesarios -----
+directorios(){
 echo "${BLUE}}[+] Creando directorios necesarios...${NC}"
 
-mkdir -p $HOME/.local/share/manga-cli-dl
-mkdir -p $HOME/.local/share/manga-cli-dl/output
-mkdir -p $HOME/.local/share/manga-cli-dl/output/results
-mkdir -p $HOME/.local/share/manga-cli-dl/downloads
-mkdir -p $HOME/.local/python-lib
+# ----- Creación de directorios en el home del usuario -----
+
+mkdir -p "$HOME"/.local/share/manga-cli-dl
+mkdir -p "$HOME"/.local/share/manga-cli-dl/output
+mkdir -p "$HOME"/.local/share/manga-cli-dl/output/results
+mkdir -p "$HOME"/.local/share/manga-cli-dl/downloads
+mkdir -p "$HOME"/.local/python-lib
+
+# ----- Copia de archivos necesarios -----
 
 echo "${GREEN}[+] Copiando archivos necesarios...${NC}"
-cp -r ./src/* $HOME/.local/share/manga-cli-dl/src/
-cp -r ./tools/* $HOME/.local/share/manga-cli-dl/tools/
-cp ./main /usr/local/bin/
+
+if [[ "$PREFIX" == *com.termux* ]]; then
+    cp -r ./src/android/* "$HOME"/.local/share/manga-cli-dl/src/
+    cp -r ./tools/* "$HOME"/.local/share/manga-cli-dl/tools/
+    cp manga-cli-dl "$PREFIX"/bin/manga-cli-dl
+else
+    cp -r ./src/linux/* "$HOME"/.local/share/manga-cli-dl/src/
+    cp -r ./tools/* "$HOME"/.local/share/manga-cli-dl/tools/
+    cp manga-cli-dl "$PREFIX"/bin/manga-cli-dl
+fi
 
 echo "${GREEN}[+] Creacion completa...${NC}"
 
+}
+
 # ----- Dependencies installation -------
 
+dependencies(){
 echo "${GREEN}[+] Instalando dependencias...${NC}"
 
-pip install --upgrade pip
-pip install --target=$HOME/.local/python-lib -r ./requirements.txt
-
-echo "${GREEN}[+] Instalación completada con éxito.${NC}"
-
-# ------- Configuración del Python Path -------
-SHELL_RC="$HOME/.bashrc"
-if [ -f "$HOME/.zshrc" ]; then
-    SHELL_RC="$HOME/.zshrc"
-fi
-
-if ! grep -q "PYTHONPATH" "$SHELL_RC"; then 
-    echo "${GREEN}[+] Configurando PYTHONPATH...${NC}"
-    echo 'export PYTHONPATH="$HOME/.local/python-lib:$PYTHONPATH"' >> "$SHELL_RC"
-    echo "${GREEN}[+]python añadido al PATH...${NC}"
-else
-    echo "${YELLOW}[!] PYTHONPATH ya está configurado.${NC}"
-fi
-
 # ------ Dependencias de sistema ------
+
 echo "${GREEN}[+] Instalando dependencias del sistema...${NC}"
 
 
 deps=("python3" "python3-pip" "curl" "fzf" "grep" "aria2c" "wget" "zip")
 
 # --- Detectar la distribución del sistema ----
+
 detected_distro(){
     if [ -f /etc/os-release ]; then
-        . /etc/os-release
+        # shellcheck source=/etc/os-release
+        source /etc/os-release
         echo "$ID" # retorna el ID de la distribución
+    elif [[ "$PREFIX" == *com.termux* ]]; then
+        echo "termux"
     else
         uname -s
     fi
 }
 
 # --- Instalación de dependencias según la distribución ---
-install_deps() {
+install_deps(){
 local distro="$1"
 local pakage_manager=""
 local install_command=""
@@ -77,7 +78,7 @@ case "${distro}" in
         ;;
     debian|ubuntu|linuxmint|pop|kali|raspbian|elementary)
         pakage_manager="apt"
-        install_command="sudo apt-get install -y"
+        install_command="sudo apt install -y"
         ;;
     fedora|centos|rhel)
         pakage_manager="dnf"
@@ -94,6 +95,10 @@ case "${distro}" in
     gentoo)
         pakage_manager="emerge"
         install_command="sudo emerge --ask"
+        ;;
+    termux)
+        pakage_manager="pkg"
+        install_command="pkg install -y"
         ;;
     *)
         echo "${YELLOW}[!] Distribución no reconocida. Instalación manual de dependencias requerida.${NC}"
@@ -113,9 +118,45 @@ for dep in "${deps[@]}"; do
 done
 }
 
+# ----- Instalación de pip y dependencias de Python -----
+
+# --- verificar si es Termux ---
+
+if [[ "$PREFIX" == *com.termux* ]]; then
+    pip install --target=$HOME/.local/python-lib -r ./requirements_android.txt
+else
+    pip install --target=$HOME/.local/python-lib -r ./requerements.txt
+fi
+
+echo "${GREEN}[+] Instalación completada con éxito.${NC}"
+
+# ------- Configuración del Python Path -------
+
+SHELL_RC="$HOME/.bashrc"
+if [ -f "$HOME/.zshrc" ]; then
+    SHELL_RC="$HOME/.zshrc"
+fi
+
+if ! grep -q "PYTHONPATH" "$SHELL_RC"; then 
+    echo "${GREEN}[+] Configurando PYTHONPATH...${NC}"
+    # shellcheck disable=SC2016
+    echo 'export PYTHONPATH="$HOME/.local/python-lib:$PYTHONPATH"' >> "$SHELL_RC"
+    echo "${GREEN}[+]python añadido al PATH...${NC}"
+else
+    echo "${YELLOW}[!] PYTHONPATH ya está configurado.${NC}"
+fi
+
+
 # ----- Llamada a la función de instalación de dependencias -----
+
 distro=$(detected_distro)
 install_deps "$distro"
 
+}
+
+directorios
+dependencies
+
 # ----- Finalización -----
+
 echo "${GREEN}[+] Instalación completada. Puedes ejecutar 'manga-cli-dl' para comenzar.${NC}"
